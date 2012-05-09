@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
@@ -13,20 +13,44 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
+    <Filter Include="Blocks">
+      <UniqueIdentifier>{548647d0-8a33-429d-9017-b6d9470e9299}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\xmlSettings">
+      <UniqueIdentifier>{ebd3cfb3-96f8-4d56-a821-6924a14ddb63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\xmlSettings\src">
+      <UniqueIdentifier>{07cd0320-e3c9-4249-a78c-a04a915b6968}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\xmlSettings\include">
+      <UniqueIdentifier>{179fd24b-03a1-4b81-bd43-08441d0a22b8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\SettingsBasicApp.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Param.cpp">
+      <Filter>Blocks\xmlSettings\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\XmlSettings.cpp">
+      <Filter>Blocks\xmlSettings\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Resources.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>  
+    <ClInclude Include="..\..\..\include\Param.h">
+      <Filter>Blocks\xmlSettings\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\XmlSettings.h">
+      <Filter>Blocks\xmlSettings\include</Filter>
+    </ClInclude>
+  </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resources.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
-  </ItemGroup>  
+  </ItemGroup>
 </Project>

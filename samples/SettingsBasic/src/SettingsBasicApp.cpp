@@ -27,7 +27,7 @@ class SettingsBasicApp : public AppBasic {
 	void draw();
 	
 	
-	nocte::XmlSettings	*mSettings;
+	ci::settings::XmlSettings	*mSettings;
 	
 	int			mTestInt32;
 	float		mTestFloat;
@@ -46,18 +46,17 @@ class SettingsBasicApp : public AppBasic {
 
 void SettingsBasicApp::setup()
 {
-	mSettings = new nocte::XmlSettings();							// create a new instance, at this point XmlSettings doesn't have any file associated
+	mSettings = new ci::settings::XmlSettings();							// create a new instance, at this point XmlSettings doesn't have any file associated
 	
 //	mSettings->addParam( "mTestInt32",	&mTestInt32 );
-	mSettings->addParam( "mTestFloat",	&mTestFloat, true, "min=0.0 max=5.0 step=0.5" );				// add a new variable to the XmlSettings
-	mSettings->addParam( "mTestDouble",	&mTestDouble, false );
-	mSettings->addParam( "mTestBool",	&mTestBool, true );
+	mSettings->addParam( "mTestFloat",	&mTestFloat, "test", true, "min=0.0 max=5.0 step=0.5" );				// add a new variable to the XmlSettings
+	mSettings->addParam( "mTestDouble",	&mTestDouble, "test", false );
+	mSettings->addParam( "mTestBool",	&mTestBool, "", true );
 //	mSettings->addParam( "mTestVec2f",	&mTestVec2f );
-	mSettings->addParam( "mTestVec3f",	&mTestVec3f, true, "" );
-	mSettings->addParam( "mTestColor",	&mTestColor, true, "" );
-	mSettings->addParam( "mTestColorA",	&mTestColorA, true, "" );
-	mSettings->addParam( "mTestString",	&mTestString, true, "" );
-	mSettings->addParam( "mTestAnotherString",	&mTestAnotherString, true, "" );
+	mSettings->addParam( "mTestVec3f",	&mTestVec3f, "input", true );
+	mSettings->addParam( "mTestColor",	&mTestColor, "input", true );
+	mSettings->addParam( "mTestColorA",	&mTestColorA, "output", true );
+	mSettings->addParam( "mTestString",	&mTestString, "output", true );
 	
 	//mTestInt32	= 0;
 	mTestFloat	= 0.0f;
@@ -75,14 +74,14 @@ void SettingsBasicApp::setup()
 	if ( filename != "" )
 		mSettings->load(filename);									// load the xml settings file, this method override all the current values in XmlSettings
 	
-	mSettings->addParam( "mTestInt32",	&mTestInt32, true, "" );				// if mTestInt32 has been loaded already from the xml file ( load() ), but not added yet, addParam() just replace the pointer
+	mSettings->addParam( "mTestInt32",	&mTestInt32, "", true );				// if mTestInt32 has been loaded already from the xml file ( load() ), but not added yet, addParam() just replace the pointer
 	console() << mTestInt32 << endl;
 	
-	//mTestColor	= Color::black();
 	mTestInt32	= 666;
 	console() << mTestInt32 << endl;
 
-	console() << mSettings->getValueByName<ColorA>("mTestColorA") << endl;
+	console() << mSettings->getValueByName<float>("mTestFloat") << endl;
+	//console() << mSettings->getValueByName<ColorA>("mTestColorA") << endl;
 }
 
 

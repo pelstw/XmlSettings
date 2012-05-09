@@ -22,7 +22,7 @@
  </settings>
  */
 
-namespace nocte { 
+namespace cinder { namespace settings { 
 	
 	static const std::string typeString[10] = { 
 		"int", 
@@ -36,7 +36,6 @@ namespace nocte {
 		"Font", 
 		"string" 
 	};
-
 
 	class Param {
 
@@ -57,8 +56,13 @@ namespace nocte {
 			PARAM_STRING
 		};
 		
-		Param( const std::string &name, void *param, ParamType paramType, bool show = false, const std::string &option = "" ) :
-			mName(name), mParam(param), mType(paramType), mShow(show), mOption(option)
+		Param( const std::string &name, void *param, ParamType paramType, const std::string &category = "default", bool show = false, const std::string &option = "" ) :
+				mName(name), 
+				mParam(param), 
+				mType(paramType), 
+				mShow(show), 
+				mOption(option),
+				mCategory(category)
 		{
 		};
 
@@ -70,10 +74,12 @@ namespace nocte {
 
 		std::string getName() { return mName; };
 
-		std::string	getType() { return typeString[mType]; };
-		
-		std::string getAsString() { 
+		std::string getType() { return typeString[mType]; };
 
+		std::string getCategory() { return mCategory; };
+		
+		std::string getAsString() 
+		{ 
 			if ( mType == PARAM_INT )
 				return ci::toString(*static_cast<int*>(mParam));
 			else if ( mType == PARAM_FLOAT )
@@ -82,24 +88,27 @@ namespace nocte {
 				return ci::toString(*static_cast<double*>(mParam));
 			else if ( mType == PARAM_BOOL )
 				return ci::toString(*static_cast<bool*>(mParam));
-// 			else if ( mType == PARAM_VEC2F )
-// 				return ci::toString(*static_cast<ci::Vec2f*>(mParam));
 			else if ( mType == PARAM_VEC3F )
 				return ci::toString(*static_cast<ci::Vec3f*>(mParam));
 			else if ( mType == PARAM_COLOR )
 				return ci::toString(*static_cast<ci::Color*>(mParam));
 			else if ( mType == PARAM_COLORA )
 				return ci::toString(*static_cast<ci::ColorA*>(mParam));
-// 			else if ( mType == PARAM_FONT )
-// 				return "TODO !!!!";//ci::toString(*static_cast<ci::ColorA*>(mParam));
 			else if ( mType == PARAM_STRING )
 				return *static_cast<std::string*>(mParam);
 		};
 
-
-		ci::XmlTree getXmlNode()
+		void addXmlNode( ci::XmlTree &root )
 		{
-			ci::XmlTree node( mName, "" );
+ 			ci::XmlTree *category;
+ 			bool categoryExists = root.hasChild( mCategory );
+			
+			if ( categoryExists )
+				category = &root.getChild( mCategory ); 
+			else
+				category = new ci::XmlTree( mCategory, "" );
+
+			ci::XmlTree node( mName , "" );
 			node.setAttribute( "type", getType() );
 			
 			if ( mType == PARAM_INT )
@@ -110,11 +119,6 @@ namespace nocte {
 				node.setAttribute( "value", *static_cast<double*>(mParam) );
 			else if ( mType == PARAM_BOOL )
 				node.setAttribute( "value", *static_cast<bool*>(mParam) );
-// 			else if ( mType == PARAM_VEC2F )
-// 			{
-// 				node.setAttribute( "x", static_cast<ci::Vec2f*>(mParam)->x );
-// 				node.setAttribute( "y", static_cast<ci::Vec2f*>(mParam)->y );
-// 			}
 			else if ( mType == PARAM_VEC3F )
 			{
 				node.setAttribute( "x", static_cast<ci::Vec3f*>(mParam)->x );
@@ -134,52 +138,51 @@ namespace nocte {
 				node.setAttribute( "b", static_cast<ci::ColorA*>(mParam)->b );
 				node.setAttribute( "a", static_cast<ci::ColorA*>(mParam)->a );
 			}
-// 			else if ( mType == PARAM_FONT )
-// 			{
-// 				node.setAttribute( "typeface", static_cast<ci::Font*>(mParam)->getName() );
-// 				node.setAttribute( "size", static_cast<ci::Font*>(mParam)->getSize() );
-// 			}
 			else if ( mType == PARAM_STRING )
 				node.setAttribute( "value", *static_cast<std::string*>(mParam) );
 
 			node.setAttribute( "show", mShow );
 			node.setAttribute( "option", mOption );
+			node.setAttribute( "category", mCategory );
 
-			return node;
+			category->push_back( node );
+
+			if ( !categoryExists )
+			{
+				root.push_back( *category );
+				delete category;
+			}
 
 		};
-		
-		
+
 	protected:
-		
+
 		std::string		mName;
 		void			*mParam;
 		ParamType		mType;
 		bool			mShow;
 		std::string		mOption;
-
+		std::string		mCategory;
 	};
 
-
 	class XmlSettings {
-		
+
 	public:
-		
+
 		XmlSettings() 
 		{ 
 			mFilename = "";
-			mParamGUI = ci::params::InterfaceGl("Input", ci::Vec2i(280, 560));
+			mParamGUI = ci::params::InterfaceGl("XML SETTINGS", ci::Vec2i(280, 560));
 			mParamGUI.setOptions();
-			mParamGUI.addSeparator( "Tada" );
-			mParamGUI.addText( "Tadaa");
 		};
-
 
 		void parseNode( ci::XmlTree node )
 		{
-
-			std::string type	= node.getAttributeValue<std::string>("type");
-			std::string name	= node.getTag();
+			std::string type		= node.getAttributeValue<std::string>("type");
+			std::string name		= node.getTag();
+			std::string category	= node.getAttributeValue<std::string>("category");
+			bool show				= node.getAttributeValue<bool>("show"); 
+			std::string	option		= node.getAttributeValue<std::string>("option");
 			bool paramFound		= false;
 
 			for( int k=0; k < mParams.size(); k++)
@@ -197,9 +200,6 @@ namespace nocte {
 					else if ( type == "double" )
 						mParams[k]->setValue<double>( node.getAttributeValue<double>("value") );
 
-					//else if ( type == "Vec2f" )
-					//	mParams[k]->setValue<ci::Vec2f>( ci::Vec2f( node.getAttributeValue<float>("x"), node.getAttributeValue<float>("y") ) );
-
 					else if ( type == "Vec3f" )
 						mParams[k]->setValue<ci::Vec3f>( ci::Vec3f( node.getAttributeValue<float>("x"), node.getAttributeValue<float>("y"), node.getAttributeValue<float>("z") ) );
 
@@ -212,9 +212,6 @@ namespace nocte {
 					else if ( type == "ColorA" )
 						mParams[k]->setValue<ci::ColorA>( ci::ColorA( node.getAttributeValue<float>("r"), node.getAttributeValue<float>("g"), node.getAttributeValue<float>("b"), node.getAttributeValue<float>("a") ) );
 
-					//else if ( type == "Font" )
-					//	mParams[k]->setValue<ci::Font>( ci::Font( node.getAttributeValue<std::string>("typeface"), node.getAttributeValue<int>("size") ) );
-
 					else if ( type == "string" )
 						mParams[k]->setValue<std::string>( node.getAttributeValue<std::string>("value") );
 				} 
@@ -223,60 +220,30 @@ namespace nocte {
 			if ( !paramFound )
 			{
 				if ( type == "int" )
-					addParam( name, new int(node.getAttributeValue<int>("value")), 
-					node.getAttributeValue<bool>("show"), 
-					node.getAttributeValue<std::string>("option"));
+					addParam( name, new int( node.getAttributeValue<int>("value") ), category, show, option );
 
 				else if ( type == "float" )
-					addParam( name, new float(node.getAttributeValue<float>("value")),
-					node.getAttributeValue<bool>("show"), 
-					node.getAttributeValue<std::string>("option"));
+					addParam( name, new float( node.getAttributeValue<float>("value") ), category, show, option );
 
 				else if ( type == "double" )
-					addParam( name, new double(node.getAttributeValue<double>("value")),
-					node.getAttributeValue<bool>("show"), 
-					node.getAttributeValue<std::string>("option"));
-
-				//else if ( type == "Vec2f" )
-				//	addParam( name, new ci::Vec2f( node.getAttributeValue<float>("x"), node.getAttributeValue<float>("y") ) );
+					addParam( name, new double( node.getAttributeValue<double>("value") ), category, show, option );
 
 				else if ( type == "Vec3f" )
-					addParam( name, new ci::Vec3f( node.getAttributeValue<float>("x"), 
-					node.getAttributeValue<float>("y"), 
-					node.getAttributeValue<float>("z") ), 
-					node.getAttributeValue<bool>("show"), 
-					node.getAttributeValue<std::string>("option"));
+					addParam( name, new ci::Vec3f( node.getAttributeValue<float>("x"), node.getAttributeValue<float>("y"), node.getAttributeValue<float>("z") ), category, show, option );
 
 				else if ( type == "bool" )
-					addParam( name, new bool(node.getAttributeValue<bool>("value")),
-					node.getAttributeValue<bool>("show"), 
-					node.getAttributeValue<std::string>("option"));
+					addParam( name, new bool( node.getAttributeValue<bool>("value") ), category, show, option );
 
 				else if ( type == "Color" )
-					addParam( name, new ci::Color( node.getAttributeValue<float>("r"), 
-					node.getAttributeValue<float>("g"), 
-					node.getAttributeValue<float>("b") ), 
-					node.getAttributeValue<bool>("show"), 
-					node.getAttributeValue<std::string>("option"));
+					addParam( name, new ci::Color( node.getAttributeValue<float>("r"), node.getAttributeValue<float>("g"), node.getAttributeValue<float>("b") ), category, show, option );
 
 				else if ( type == "ColorA" )
-					addParam( name, new ci::ColorA( node.getAttributeValue<float>("r"), 
-					node.getAttributeValue<float>("g"), 
-					node.getAttributeValue<float>("b"), 
-					node.getAttributeValue<float>("a") ), 
-					node.getAttributeValue<bool>("show"),
-					node.getAttributeValue<std::string>("option"));
-
-				//else if ( type == "Font" )
-				//	addParam( name, new ci::Font( node.getAttributeValue<std::string>("typeface"), node.getAttributeValue<int>("size") ) );
+					addParam( name, new ci::ColorA( node.getAttributeValue<float>("r"), node.getAttributeValue<float>("g"), node.getAttributeValue<float>("b"), node.getAttributeValue<float>("a") ), category, show, option );
 
 				else if ( type == "string" )
-					addParam( name, new std::string(node.getAttributeValue<std::string>("value")), 
-					node.getAttributeValue<bool>("show"),
-					node.getAttributeValue<std::string>("option"));
+					addParam( name, new std::string(node.getAttributeValue<std::string>("value")), category, show, option );
 			}
 		};
-
 
 		bool hasParam(std::string name) 
 		{
@@ -287,7 +254,6 @@ namespace nocte {
 			return false;
 		};
 
-
 		Param* getParam(std::string name) 
 		{
 			for( int k=0; k < mParams.size(); k++)
@@ -297,9 +263,8 @@ namespace nocte {
 			return NULL;
 		};
 
-
-		template <class T>
-		T		getValueByName( const std::string &name ) 
+		template <typename T>
+		T	getValueByName( const std::string &name ) 
 		{ 
 			Param *p = getParam(name);
 			
@@ -311,7 +276,6 @@ namespace nocte {
 			
 			return *static_cast<T*>( p->mParam ); 
 		};
-
 
 		void drawDebug()
 		{
@@ -331,17 +295,21 @@ namespace nocte {
 			ci::gl::Texture tex = ci::gl::Texture(textLayout.render(true));
 			ci::gl::draw(tex);
 		};
-		
 
 		void drawGUI()
 		{
+			if ( mParamsChanged )
+			{
+				buildXMLTree();
+				buildGUI();
+				mParamsChanged = false;
+			}
+
 			mParamGUI.draw();
 		};
 
-
 		void load( std::string filename = "" ) 
 		{
-			
 			if ( filename != "" )
 				mFilename = filename;
 			
@@ -352,22 +320,26 @@ namespace nocte {
 			}
 			
 			try {
-				mXmlAsset = ci::XmlTree( ci::loadFile(mFilename) );
+				mXmlAsset = ci::XmlTree( ci::loadFile(mFilename) ).getChild("/settings");
 			}
 			catch ( ... ) {
 				ci::app::console() << "failed to load XML settings file: " << mFilename << std::endl;
 				return;
 			}
 			
-			std::list<ci::XmlTree> settings = mXmlAsset.getChild("/settings").getChildren();
-			
-			for(std::list<ci::XmlTree>::iterator nodeIt = settings.begin(); nodeIt != settings.end(); ++nodeIt)
-				parseNode( *nodeIt );
+			for ( ci::XmlTree::Iter categoryIter = mXmlAsset.begin(); categoryIter != mXmlAsset.end(); ++categoryIter )
+			{
+				ci::XmlTree category = *categoryIter;
+
+				for ( ci::XmlTree::Iter nodeIter = category.begin(); nodeIter != category.end(); ++nodeIter )
+				{
+					parseNode( *nodeIter );
+				}
+			}
 
 			ci::app::console() << "XML settings loaded from: " << mFilename << std::endl;
 		};
-		
-		
+
 		void save( std::string filename = "" )
 		{	
 			if ( filename == "" )
@@ -375,10 +347,7 @@ namespace nocte {
 			
 			mFilename = filename;
 			
-			mXmlAsset = ci::XmlTree("settings", "");
-			
-			for(int k=0; k < mParams.size(); k++)
-				mXmlAsset.push_back( mParams[k]->getXmlNode() );
+			buildXMLTree();
 			
 			mXmlAsset.write( ci::writeFile( mFilename ) );
 			
@@ -386,41 +355,95 @@ namespace nocte {
 			
 		};
 
+		void buildXMLTree()
+		{
+			mXmlAsset = ci::XmlTree("settings", "");
 
-		void addParam( const std::string &name, int *param, bool show, const std::string &option = "" )
-		{ addOrBind(name, param, Param::PARAM_INT, show, option); };
+			for(int k=0; k < mParams.size(); k++)
+				mParams[k]->addXmlNode( mXmlAsset );
+		};
 
-		void addParam( const std::string &name, float *param, bool show, const std::string &option = "" )
-		{ addOrBind(name, param, Param::PARAM_FLOAT, show, option); };
+		void buildGUI()
+		{
+			for ( ci::XmlTree::Iter categoryIter = mXmlAsset.begin(); categoryIter != mXmlAsset.end(); ++categoryIter )
+			{
+				ci::XmlTree category = *categoryIter;
+				
+				mParamGUI.addText( category.getTag() );
 
-		void addParam( const std::string &name, double *param, bool show, const std::string &option = "" )
-		{ addOrBind(name, param, Param::PARAM_DOUBLE, show, option); };
-		
-		void addParam( const std::string &name, bool *param, bool show, const std::string &option = "" )
-		{ addOrBind(name, param, Param::PARAM_BOOL, show, option); };
+				for ( ci::XmlTree::Iter nodeIter = category.begin(); nodeIter != category.end(); ++nodeIter )
+				{
+					std::string param = (*nodeIter).getTag();
+					Param *p = getParam( param );
+					std::string type = p->getType();
+					std::string &name = p->mName;
+					std::string &option = p->mOption;
+					bool show = p->mShow;
 
-		//void	addParam( const std::string &name, ci::Vec2f *param, bool show )	{ addOrBind(name, param, Param::PARAM_VEC2F, show); };
-		
-		void addParam( const std::string &name, ci::Vec3f *param, bool show, const std::string &option = "" )
-		{ addOrBind(name, param, Param::PARAM_VEC3F, show, option); };
+					if ( type == "int" )
+						mParamGUI.addParam( name, static_cast<int*>(p->mParam), option );
 
-		void addParam( const std::string &name, ci::Color *param, bool show, const std::string &option = "" )
-		{ addOrBind(name, param, Param::PARAM_COLOR, show, option); };
+					else if ( type == "float" )
+						mParamGUI.addParam( name, static_cast<float*>(p->mParam), option );
 
-		void addParam( const std::string &name, ci::ColorA *param, bool show, const std::string &option = "" )
-		{ addOrBind(name, param, Param::PARAM_COLORA, show, option); };
+					else if ( type == "double" )
+						mParamGUI.addParam( name, static_cast<double*>(p->mParam), option );
 
-		//void	addParam( const std::string &name, ci::Font *param, bool show )		{ addOrBind(name, param, Param::PARAM_FONT, show); };
-		
-		void addParam( const std::string &name, std::string *param, bool show, const std::string &option = "" )
-		{ addOrBind(name, param, Param::PARAM_STRING, show, option); };
+					else if ( type == "Vec3f" )
+						mParamGUI.addParam( name, static_cast<ci::Vec3f*>(p->mParam), option );
 
+					else if ( type == "bool" )
+						mParamGUI.addParam( name, static_cast<bool*>(p->mParam), option );
+
+					else if ( type == "Color" )
+						mParamGUI.addParam( name, static_cast<ci::Color*>(p->mParam), option );
+
+					else if ( type == "ColorA" )
+						mParamGUI.addParam( name, static_cast<ci::ColorA*>(p->mParam), option );
+
+					else if ( type == "string" )
+						mParamGUI.addParam( name, static_cast<std::string*>(p->mParam), option );
+				}
+				mParamGUI.addSeparator();
+			}
+		}
+
+		void addParam( const std::string &name, int *param, const std::string &category, bool show = false, const std::string &option = "" )
+		{ addOrBind(name, param, Param::PARAM_INT, category, show, option); };
+
+		void addParam( const std::string &name, float *param, const std::string &category, bool show = false, const std::string &option = "" )
+		{ addOrBind(name, param, Param::PARAM_FLOAT, category, show, option); };
+
+		void addParam( const std::string &name, double *param, const std::string &category, bool show = false, const std::string &option = "" )
+		{ addOrBind(name, param, Param::PARAM_DOUBLE, category, show, option); };
+
+		void addParam( const std::string &name, bool *param, const std::string &category, bool show = false, const std::string &option = "" )
+		{ addOrBind(name, param, Param::PARAM_BOOL, category, show, option); };
+
+		void addParam( const std::string &name, ci::Vec3f *param, const std::string &category, bool show = false, const std::string &option = "" )
+		{ addOrBind(name, param, Param::PARAM_VEC3F, category, show, option); };
+
+		void addParam( const std::string &name, ci::Color *param, const std::string &category, bool show = false, const std::string &option = "" )
+		{ addOrBind(name, param, Param::PARAM_COLOR, category, show, option); };
+
+		void addParam( const std::string &name, ci::ColorA *param, const std::string &category, bool show = false, const std::string &option = "" )
+		{ addOrBind(name, param, Param::PARAM_COLORA, category, show, option); };
+
+		void addParam( const std::string &name, std::string *param, const std::string &category, bool show = false, const std::string &option = "" )
+		{ addOrBind(name, param, Param::PARAM_STRING, category, show, option); };
 
 	private:
 		
 		template<typename T>
-		void addOrBind( const std::string &name, T* param, Param::ParamType paramType, bool show, const std::string &option )
+		void addOrBind( const std::string &name, T *param, Param::ParamType paramType, const std::string &category, bool show, const std::string &option )
 		{
+			std::string catg = category;
+
+			if ( catg == "" ) 
+			{
+				catg = "_";
+			}
+
 			Param *p = getParam(name);
 
 			if ( p )
@@ -428,24 +451,21 @@ namespace nocte {
 				p->mParam = param;
 				p->mShow = show;
 				p->mOption = option;
-				mParamGUI.delParam( name );
+				p->mCategory = catg;
 			}
 			else
 			{
-				mParams.push_back( new Param( name, param, paramType, show, option ) );
+				mParams.push_back( new Param( name, param, paramType, catg, show, option ) );
 			}
 
-			if ( show )
-			{
-				mParamGUI.addParam( name, param, option );
-			}
+			mParamsChanged = true;
 		}
 		
 		std::string					mFilename;
 		std::vector<Param*>			mParams;
 		ci::XmlTree					mXmlAsset;
-		std::vector<ci::XmlTree>	mXmlNodes;
 		ci::params::InterfaceGl		mParamGUI;
+		bool						mParamsChanged;
 	};
 
-}
+} } // namespace cinder::settings
