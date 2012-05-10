@@ -8,7 +8,6 @@
  *
  */
 
-
 #include "cinder/app/AppBasic.h"
 #include "cinder/gl/gl.h"
 #include "cinder/gl/Texture.h"
@@ -26,7 +25,6 @@ class SettingsBasicApp : public AppBasic {
 	void keyDown( KeyEvent event );
 	void draw();
 	
-	
 	ci::settings::XmlSettings	*mSettings;
 	
 	int			mTestInt32;
@@ -34,40 +32,34 @@ class SettingsBasicApp : public AppBasic {
 	double		mTestDouble;
 	bool		mTestBool;
 	
-	Vec2f		mTestVec2f;
 	Vec3f		mTestVec3f;
 	
 	Color		mTestColor;
 	ColorA		mTestColorA;
 	
 	string		mTestString;
-	string		mTestAnotherString;
 };
 
 void SettingsBasicApp::setup()
 {
 	mSettings = new ci::settings::XmlSettings();							// create a new instance, at this point XmlSettings doesn't have any file associated
 	
-//	mSettings->addParam( "mTestInt32",	&mTestInt32 );
 	mSettings->addParam( "mTestFloat",	&mTestFloat, "test", true, "min=0.0 max=5.0 step=0.5" );				// add a new variable to the XmlSettings
 	mSettings->addParam( "mTestDouble",	&mTestDouble, "test", false );
 	mSettings->addParam( "mTestBool",	&mTestBool, "", true );
-//	mSettings->addParam( "mTestVec2f",	&mTestVec2f );
 	mSettings->addParam( "mTestVec3f",	&mTestVec3f, "input", true );
 	mSettings->addParam( "mTestColor",	&mTestColor, "input", true );
 	mSettings->addParam( "mTestColorA",	&mTestColorA, "output", true );
 	mSettings->addParam( "mTestString",	&mTestString, "output", true );
 	
-	//mTestInt32	= 0;
+	mTestInt32	= 0;
 	mTestFloat	= 0.0f;
 	mTestDouble	= 0.123456789;
 	mTestBool	= false;
-	mTestVec2f	= Vec2f::zero();
 	mTestVec3f	= Vec3f::zero();
 	mTestColor	= Color::black();
-	mTestColorA = ColorA::black();
-	mTestString = "zero";
-	mTestAnotherString = "zero";
+	mTestColorA	= ColorA::black();
+	mTestString	= "zero";
 	
 	string filename = getOpenFilePath().generic_string();
 	
@@ -81,7 +73,7 @@ void SettingsBasicApp::setup()
 	console() << mTestInt32 << endl;
 
 	console() << mSettings->getValueByName<float>("mTestFloat") << endl;
-	//console() << mSettings->getValueByName<ColorA>("mTestColorA") << endl;
+	console() << mSettings->getValueByName<ColorA>("mTestColorA") << endl;
 }
 
 

@@ -13,6 +13,7 @@ build/
 *.suo
 *.ncb
 *.sdf
+*.opensdf
 Debug/
 Release/
 ipch/
