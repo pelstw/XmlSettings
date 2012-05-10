@@ -76,7 +76,31 @@ namespace cinder { namespace settings {
 	private:
 		
 		template<typename T>
-		void addOrBind( const std::string &name, T *param, Param::ParamType paramType, const std::string &category, bool show, const std::string &option );
+		void addOrBind( const std::string &name, T *param, Param::ParamType paramType, const std::string &category, bool show, const std::string &option )
+		{
+			std::string catg = category;
+
+			if ( catg == "" ) 
+			{
+				catg = "_";
+			}
+
+			Param *p = getParam(name);
+
+			if ( p )
+			{
+				p->mParam = param;
+				p->mShow = show;
+				p->mOption = option;
+				p->mCategory = catg;
+			}
+			else
+			{
+				mParams.push_back( new Param( name, param, paramType, catg, show, option ) );
+			}
+
+			mParamsChanged = true;
+		}
 		
 		void buildXMLTree();
 		void buildGUI();

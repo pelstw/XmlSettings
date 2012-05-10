@@ -93,20 +93,6 @@ namespace cinder { namespace settings {
 		return NULL;
 	}
 
-// 	template <typename T>
-// 	T	XmlSettings::getValueByName( const std::string &name )
-// 	{ 
-// 		Param *p = getParam(name);
-// 
-// 		if ( !p )
-// 		{
-// 			ci::app::console() << "param not found: " << name << std::endl;
-// 			exit(-1); // throw exception instead
-// 		}
-// 
-// 		return *static_cast<T*>( p->mParam ); 
-// 	}
-
 	void XmlSettings::drawDebug()
 	{
 		ci::TextLayout textLayout = ci::TextLayout();
@@ -276,33 +262,6 @@ namespace cinder { namespace settings {
 	void XmlSettings::addParam( const std::string &name, std::string *param, const std::string &category, bool show, const std::string &option )
 	{ 
 		addOrBind(name, param, Param::PARAM_STRING, category, show, option);
-	}
-	
-	template<typename T>
-	void XmlSettings::addOrBind( const std::string &name, T *param, Param::ParamType paramType, const std::string &category, bool show, const std::string &option )
-	{
-		std::string catg = category;
-
-		if ( catg == "" ) 
-		{
-			catg = "_";
-		}
-
-		Param *p = getParam(name);
-
-		if ( p )
-		{
-			p->mParam = param;
-			p->mShow = show;
-			p->mOption = option;
-			p->mCategory = catg;
-		}
-		else
-		{
-			mParams.push_back( new Param( name, param, paramType, catg, show, option ) );
-		}
-
-		mParamsChanged = true;
 	}
 
 } } // namespace cinder::settings
