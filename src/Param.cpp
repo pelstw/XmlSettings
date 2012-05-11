@@ -19,6 +19,8 @@ namespace cinder { namespace settings {
 			return ci::toString(*static_cast<bool*>(mParam));
 		else if ( mType == PARAM_VEC3F )
 			return ci::toString(*static_cast<ci::Vec3f*>(mParam));
+		else if ( mType == PARAM_VEC2F )
+			return ci::toString(*static_cast<ci::Vec2f*>(mParam));
 		else if ( mType == PARAM_COLOR )
 			return ci::toString(*static_cast<ci::Color*>(mParam));
 		else if ( mType == PARAM_COLORA )
@@ -55,6 +57,11 @@ namespace cinder { namespace settings {
 			node.setAttribute( "x", static_cast<ci::Vec3f*>(mParam)->x );
 			node.setAttribute( "y", static_cast<ci::Vec3f*>(mParam)->y );
 			node.setAttribute( "z", static_cast<ci::Vec3f*>(mParam)->z );
+		}
+		else if ( mType == PARAM_VEC2F )
+		{
+			node.setAttribute( "x", static_cast<ci::Vec2f*>(mParam)->x );
+			node.setAttribute( "y", static_cast<ci::Vec2f*>(mParam)->y );
 		}
 		else if ( mType == PARAM_COLOR )
 		{

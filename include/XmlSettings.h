@@ -33,9 +33,15 @@ namespace cinder { namespace settings {
 		XmlSettings() 
 		{ 
 			mFilename = "";
-			mParamGUI = ci::params::InterfaceGl("XML SETTINGS", ci::Vec2i(280, 560));
+			mParamGUI = ci::params::InterfaceGl( "App parameters", Vec2i( 200, 400 ) );
 			mParamGUI.setOptions();
 		};
+
+		~XmlSettings()
+		{
+			for( std::vector<Param*>::iterator iter = mParams.begin(); iter != mParams.end(); ++iter )
+				delete * iter;
+		}
 
 		void parseNode( ci::XmlTree node );
 
@@ -69,6 +75,7 @@ namespace cinder { namespace settings {
 		void addParam( const std::string &name, double *param, const std::string &category, bool show = false, const std::string &option = "" );
 		void addParam( const std::string &name, bool *param, const std::string &category, bool show = false, const std::string &option = "" );
 		void addParam( const std::string &name, ci::Vec3f *param, const std::string &category, bool show = false, const std::string &option = "" );
+		void addParam( const std::string &name, ci::Vec2f *param, const std::string &category, bool show = false, const std::string &option = "" );
 		void addParam( const std::string &name, ci::Color *param, const std::string &category, bool show = false, const std::string &option = "" );
 		void addParam( const std::string &name, ci::ColorA *param, const std::string &category, bool show = false, const std::string &option = "" );
 		void addParam( const std::string &name, std::string *param, const std::string &category, bool show = false, const std::string &option = "" );
@@ -89,6 +96,7 @@ namespace cinder { namespace settings {
 
 			if ( p )
 			{
+				delete p->mParam;
 				p->mParam = param;
 				p->mShow = show;
 				p->mOption = option;

@@ -8,11 +8,12 @@
  *
  */
 
+#include "vld.h"
+
 #include "cinder/app/AppBasic.h"
 #include "cinder/gl/gl.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/Text.h"
-#include "Resources.h"
 #include "XmlSettings.h"
 
 using namespace ci;
@@ -24,6 +25,7 @@ class SettingsBasicApp : public AppBasic {
 	void setup();
 	void keyDown( KeyEvent event );
 	void draw();
+	~SettingsBasicApp();
 	
 	ci::settings::XmlSettings	*mSettings;
 	
@@ -33,6 +35,7 @@ class SettingsBasicApp : public AppBasic {
 	bool		mTestBool;
 	
 	Vec3f		mTestVec3f;
+	Vec2f		mTestVec2f;
 	
 	Color		mTestColor;
 	ColorA		mTestColorA;
@@ -48,6 +51,7 @@ void SettingsBasicApp::setup()
 	mSettings->addParam( "mTestDouble",	&mTestDouble, "test", false );
 	mSettings->addParam( "mTestBool",	&mTestBool, "", true );
 	mSettings->addParam( "mTestVec3f",	&mTestVec3f, "input", true );
+	mSettings->addParam( "mTestVec2f",	&mTestVec2f, "input", true );
 	mSettings->addParam( "mTestColor",	&mTestColor, "input", true );
 	mSettings->addParam( "mTestColorA",	&mTestColorA, "output", true );
 	mSettings->addParam( "mTestString",	&mTestString, "output", true );
@@ -57,6 +61,7 @@ void SettingsBasicApp::setup()
 	mTestDouble	= 0.123456789;
 	mTestBool	= false;
 	mTestVec3f	= Vec3f::zero();
+	mTestVec2f	= Vec2f::one();
 	mTestColor	= Color::black();
 	mTestColorA	= ColorA::black();
 	mTestString	= "zero";
@@ -100,14 +105,20 @@ void SettingsBasicApp::keyDown( KeyEvent event )
 void SettingsBasicApp::draw()
 {
 	// clear out the window with black
-	gl::clear( Color( 0, 0, 0 ) );
+	gl::clear( Color( 0.3f, 0.3f, 0.3f ) );
 	
 	if ( mSettings )
 	{
 		mSettings->drawDebug();
-		mSettings->drawGUI();
+ 		mSettings->drawGUI();
 	}
 
+}
+
+
+SettingsBasicApp::~SettingsBasicApp()
+{
+	delete mSettings;
 }
 
 

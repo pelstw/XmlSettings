@@ -111,7 +111,6 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\include\Param.h" />
     <ClInclude Include="..\..\..\include\XmlSettings.h" />
-    <ClInclude Include="..\include\Resources.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resources.rc" />

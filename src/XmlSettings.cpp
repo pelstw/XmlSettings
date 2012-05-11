@@ -33,6 +33,9 @@ namespace cinder { namespace settings {
 				else if ( type == "Vec3f" )
 					mParams[k]->setValue<ci::Vec3f>( ci::Vec3f( node.getAttributeValue<float>("x"), node.getAttributeValue<float>("y"), node.getAttributeValue<float>("z") ) );
 
+				else if ( type == "Vec2f" )
+					mParams[k]->setValue<ci::Vec2f>( ci::Vec2f( node.getAttributeValue<float>("x"), node.getAttributeValue<float>("y") ) );
+
 				else if ( type == "bool" )
 					mParams[k]->setValue<bool>( node.getAttributeValue<bool>("value") );
 
@@ -60,6 +63,9 @@ namespace cinder { namespace settings {
 
 			else if ( type == "Vec3f" )
 				addParam( name, new ci::Vec3f( node.getAttributeValue<float>("x"), node.getAttributeValue<float>("y"), node.getAttributeValue<float>("z") ), category, show, option );
+
+			else if ( type == "Vec2f" )
+				addParam( name, new ci::Vec2f( node.getAttributeValue<float>("x"), node.getAttributeValue<float>("y") ), category, show, option );
 
 			else if ( type == "bool" )
 				addParam( name, new bool( node.getAttributeValue<bool>("value") ), category, show, option );
@@ -95,6 +101,7 @@ namespace cinder { namespace settings {
 
 	void XmlSettings::drawDebug()
 	{
+		// MEMORY LEAKS IN THE TEXTLAYOUT, RELATED TO FONTS
 		ci::TextLayout textLayout = ci::TextLayout();
 		textLayout.setColor( ci::Color::white() );
 		textLayout.clear( ci::Color::black() );
@@ -210,6 +217,12 @@ namespace cinder { namespace settings {
 					else if ( type == "Vec3f" )
 						mParamGUI.addParam( name, static_cast<ci::Vec3f*>(p->mParam), option );
 
+					else if ( type == "Vec2f" )
+					{
+						// not ready yet!
+						ci::app::console() << "XML settings can't add a Vec2f to GUI yet!" << std::endl;
+					}
+
 					else if ( type == "bool" )
 						mParamGUI.addParam( name, static_cast<bool*>(p->mParam), option );
 
@@ -222,6 +235,7 @@ namespace cinder { namespace settings {
 					else if ( type == "string" )
 						mParamGUI.addParam( name, static_cast<std::string*>(p->mParam), option );
 				}
+
 			}
 			mParamGUI.addSeparator();
 		}
@@ -250,6 +264,11 @@ namespace cinder { namespace settings {
 	void XmlSettings::addParam( const std::string &name, ci::Vec3f *param, const std::string &category, bool show, const std::string &option )
 	{
 		addOrBind(name, param, Param::PARAM_VEC3F, category, show, option);
+	}
+
+	void XmlSettings::addParam( const std::string &name, ci::Vec2f *param, const std::string &category, bool show, const std::string &option )
+	{
+		addOrBind(name, param, Param::PARAM_VEC2F, category, show, option);
 	}
 
 	void XmlSettings::addParam( const std::string &name, ci::Color *param, const std::string &category, bool show, const std::string &option )
